@@ -1,7 +1,7 @@
 # x-ui_bot
 A telegram bot for reporting the status of X-UI accounts to the users
 
-It is getting users' data from the x-ui panel in a thread. Users can send the account or the hashed ID and gets the account report. 
+It is getting users' data from the x-ui panel in a thread. Users can send the account or the hashed ID to the telegram bot and gets the account report. 
 
 ## Installation:
 
@@ -9,4 +9,7 @@ It is getting users' data from the x-ui panel in a thread. Users can send the ac
 * `cd x-ui_bot`
 * edit the `.env.example` to `.env`, and edit it data
 * `pip install -r requirement.txt`
+
+I suggest running it in Tmux.
+
 * `python3 main.py`
