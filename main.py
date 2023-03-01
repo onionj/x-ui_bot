@@ -219,6 +219,7 @@ if __name__ == "__main__":
     # login to panel
     if not user_fetch.login():
         print("login failed")
+        exit(2)
 
     Thread(target=user_fetch.update).start()  # start lop for get update from server
 
