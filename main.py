@@ -208,7 +208,7 @@ async def users(client: Client, message: Message):
         user_total = user.get("down", 0) + user.get("up", 0)
 
         if user["expiryTime"] == 0:
-            expiryTime = "بدون محدودیت زمانی"
+            expiryTime = "(بدون محدودیت)"
         else:
             seconds = int(str(user["expiryTime"])[:10]) - int(time.time())
 
@@ -220,8 +220,8 @@ async def users(client: Client, message: Message):
         user_data = f"""
 ایمیل: {user['email']}
 هش ایدی: {user['hashed_id'][:8]}...
-چند کاربره:   {user['limitIp'] or 'بی نهایت'}
-حجم قابل استفاده: {user_fetch.sizeof_fmt(user['totalGB']) if 0 != user.get('totalGB') else "بی نهایت" }
+چند کاربره:   {user['limitIp'] or '(بدون محدودیت)'}
+حجم قابل استفاده: {user_fetch.sizeof_fmt(user['totalGB']) if 0 != user.get('totalGB') else "(بدون محدودیت)" }
 حجم کلی استفاده شده: {user_fetch.sizeof_fmt(user_total) if 0 != user_total else 0 }
 مقدار اپلود: {user_fetch.sizeof_fmt(user['up']) if 0 != user.get('up') else 0 }
 مقدار دانلود: {user_fetch.sizeof_fmt(user['down']) if 0 != user.get('down') else 0 }
