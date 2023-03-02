@@ -14,5 +14,4 @@ I suggest running it in Tmux.
 
 * `python3 main.py`
 
-## Sponser ❤️:
-[Parazit051](https://t.me/Parazit051)
+## Sponser ❤️: [Parazit051](https://t.me/Parazit051)
