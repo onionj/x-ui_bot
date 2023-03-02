@@ -4,7 +4,7 @@ import json
 import time
 import re
 
-from typing import TypedDict
+from typing import TypedDict, Optional
 from threading import Thread, main_thread
 
 import requests
@@ -123,13 +123,13 @@ class UserFetch:
             return f"{size:.{2}f} {unit}"
         return size
 
-    def get_by_id(self, hashed_id) -> UserDataType | None:
+    def get_by_id(self, hashed_id) -> Optional[UserDataType]:
         for _, user in self.users_datas.items():
             if user["hashed_id"] == hashed_id:
                 return user
         return None
 
-    def get_by_email(self, email) -> UserDataType | None:
+    def get_by_email(self, email) -> Optional[UserDataType]:
         for _, user in self.users_datas.items():
             if user["email"] == email:
                 return user
@@ -154,7 +154,7 @@ app = Client(
 )
 
 
-def extract_vless_hash_id(vless: str) -> str | None:
+def extract_vless_hash_id(vless: str) -> Optional[str]:
     data = re.findall(r"vless:\/\/(.*)@", vless)
 
     hash_id = None
@@ -164,7 +164,7 @@ def extract_vless_hash_id(vless: str) -> str | None:
     return hash_id
 
 
-def extract_vmess_hash_id(vmess: str) -> str | None:
+def extract_vmess_hash_id(vmess: str) -> Optional[str]:
     try:
         data = vmess[8:]
         data = data.encode(encoding="utf8")
