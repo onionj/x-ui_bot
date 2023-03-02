@@ -13,3 +13,6 @@ It is getting users' data from the x-ui panel in a thread. Users can send the ac
 I suggest running it in Tmux.
 
 * `python3 main.py`
+
+## Sponser ❤️:
+[Parazit051](https://t.me/Parazit051)
