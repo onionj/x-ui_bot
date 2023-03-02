@@ -1,3 +1,4 @@
+import datetime
 import base64
 import json
 import time
@@ -128,6 +129,12 @@ class UserFetch:
                 return user
         return None
 
+    def get_by_email(self, email) -> UserDataType | None:
+        for _, user in self.users_datas.items():
+            if user["email"] == email:
+                return user
+        return None
+
 
 user_fetch = UserFetch(
     panel_ip_address=settings.PANEL_ADDRESS,
@@ -194,18 +201,33 @@ async def users(client: Client, message: Message):
 
     user = user_fetch.get_by_id(hash_id)
 
+    if not user:
+        user = user_fetch.get_by_email(text)
+
     if user:
         user_total = user.get("down", 0) + user.get("up", 0)
 
+        if user["expiryTime"] == 0:
+            expiryTime = "بدون محدودیت زمانی"
+        else:
+            seconds = int(str(user["expiryTime"])[:10]) - int(time.time())
+
+            if seconds < 0:
+                seconds = 0
+
+            expiryTime = datetime.timedelta(seconds=seconds)
+
         user_data = f"""
 ایمیل: {user['email']}
-هش ایدی: {user['hashed_id']}
+هش ایدی: {user['hashed_id'][:8]}...
 چند کاربره:   {user['limitIp'] or 'بی نهایت'}
 حجم قابل استفاده: {user_fetch.sizeof_fmt(user['totalGB']) if 0 != user.get('totalGB') else "بی نهایت" }
 حجم کلی استفاده شده: {user_fetch.sizeof_fmt(user_total) if 0 != user_total else 0 }
 مقدار اپلود: {user_fetch.sizeof_fmt(user['up']) if 0 != user.get('up') else 0 }
 مقدار دانلود: {user_fetch.sizeof_fmt(user['down']) if 0 != user.get('down') else 0 }
 وضعیت: {"فعال" if user['enable'] else user['غیر فعال']}
+زمان باقی مانده:
+{expiryTime}
 """
 
     else:
