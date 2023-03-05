@@ -7,7 +7,7 @@ It is getting users' data from the x-ui panel in a thread. Users can send the ac
 
 * `git clone https://github.com/onionj/x-ui_bot.git`
 * `cd x-ui_bot`
-* edit the `.env.example` to `.env`, and edit it data
+* Rename the `.env.example` to `.env`, and edit it data
 * `pip install -r requirement.txt`
 
 I suggest running it in Tmux.
