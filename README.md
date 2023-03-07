@@ -3,6 +3,8 @@ A telegram bot for reporting the status of X-UI accounts to the users
 
 It is getting users' data from the x-ui panel in a thread. Users can send the account or the hashed ID to the telegram bot and gets the account report. 
 
+This code's working with https://github.com/HexaSoftwareTech/x-ui .
+
 ## Installation:
 
 * `git clone https://github.com/onionj/x-ui_bot.git`
