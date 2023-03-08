@@ -225,7 +225,7 @@ async def users(client: Client, message: Message):
 حجم کلی استفاده شده: {user_fetch.sizeof_fmt(user_total) if 0 != user_total else 0 }
 مقدار اپلود: {user_fetch.sizeof_fmt(user['up']) if 0 != user.get('up') else 0 }
 مقدار دانلود: {user_fetch.sizeof_fmt(user['down']) if 0 != user.get('down') else 0 }
-وضعیت: {"فعال" if user['enable'] else user['غیر فعال']}
+وضعیت: {"فعال" if user['enable'] else "غیر فعال"}
 زمان باقی مانده:
 {expiryTime}
 """
