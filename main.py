@@ -79,24 +79,8 @@ class UserFetch:
         report_datas = {}
 
         for _, user in self.users_datas.items():
-            if report_datas.get(user["port"]):
-                if user["enable"]:
-                    report_datas[user["port"]]["active_users_count"] += 1
-                    report_datas[user["port"]]["active_unlimited_users"] += (
-                        1 if user["totalGB"] == 0 else 0
-                    )
-                    report_datas[user["port"]]["active_users_totalGB"] += user["totalGB"]
-                    report_datas[user["port"]]["active_users_totalUsed"] += (user["down"] + user["up"])
-                else:
-                    report_datas[user["port"]]["inactive_users_count"] += 1
-                    report_datas[user["port"]]["inactive_unlimited_users"] += (
-                        1 if user["totalGB"] == 0 else 0
-                    )
-                    report_datas[user["port"]]["inactive_users_totalGB"] += user["totalGB"]
-                    report_datas[user["port"]]["inactive_users_totalUsed"] += (user["down"] + user["up"])
-
-            else:
-                report_data = {
+            if not report_datas.get(user["port"]):
+                report_datas[user["port"]] = {
                     "active_users_count": 0,
                     "active_unlimited_users": 0,
                     "active_users_totalGB": 0,
@@ -107,26 +91,17 @@ class UserFetch:
                     "inactive_users_totalUsed": 0,
                 }
 
-                if user["enable"]:
-                    report_data.update(
-                        {
-                            "active_users_count": 1,
-                            "active_unlimited_users": 1 if user["totalGB"] == 0 else 0,
-                            "active_users_totalGB": user["totalGB"],
-                            "active_users_totalUsed": user["down"] + user["up"],
-                        }
-                    )
-                else:
-                    report_data.update(
-                        {
-                            "inactive_users_count": 1,
-                            "inactive_unlimited_users": 1 if user["totalGB"] == 0 else 0,
-                            "inactive_users_totalGB": user["totalGB"],
-                            "inactive_users_totalUsed": user["down"] + user["up"],
-                        }
-                    )
+            if user["enable"]:
+                report_datas[user["port"]]["active_users_count"] += 1
+                report_datas[user["port"]]["active_unlimited_users"] += 1 if user["totalGB"] == 0 else 0
+                report_datas[user["port"]]["active_users_totalGB"] += user["totalGB"]
+                report_datas[user["port"]]["active_users_totalUsed"] += (user["down"] + user["up"])
 
-                report_datas[user["port"]] = report_data
+            else:
+                report_datas[user["port"]]["inactive_users_count"] += 1
+                report_datas[user["port"]]["inactive_unlimited_users"] += 1 if user["totalGB"] == 0 else 0
+                report_datas[user["port"]]["inactive_users_totalGB"] += user["totalGB"]
+                report_datas[user["port"]]["inactive_users_totalUsed"] += (user["down"] + user["up"])
 
         for key in report_datas.keys():
             report_datas[key]["active_users_totalGB"] = self.sizeof_fmt(report_datas[key]["active_users_totalGB"])
@@ -307,5 +282,4 @@ if __name__ == "__main__":
     Thread(target=user_fetch.update).start()  # start lop for get update from server
 
     print("start telegram bot app")
-
     app.run()
