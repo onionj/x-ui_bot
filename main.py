@@ -4,6 +4,7 @@ import json
 import time
 import re
 
+from pprint import pprint
 from typing import TypedDict, Optional
 from threading import Thread, main_thread
 
@@ -24,7 +25,6 @@ class Settings(BaseSettings):
     API_ID: str
     BOT_TOKEN: str
 
-
     class Config:
         env_file = ".env"
 
@@ -39,18 +39,17 @@ class UserDataType(TypedDict):
     limitIp: int
     totalGB: int
     expiryTime: int
-    hashed_id: str
+    uid: str
     inboundId: int
     enable: bool
     up: int
     down: int
     total: int
+    port: int
 
 
 class UserFetch:
-    def __init__(
-        self, panel_ip_address: str, panel_username: str, panel_password: str
-    ) -> None:
+    def __init__(self, panel_ip_address: str, panel_username: str, panel_password: str) -> None:
         self.panel_ip_address = panel_ip_address.rstrip("/")
         self.panel_username = panel_username
         self.panel_password = panel_password
@@ -76,6 +75,69 @@ class UserFetch:
             print(e)
             return False
 
+    def report_all(self):
+        report_datas = {}
+
+        for _, user in self.users_datas.items():
+            if report_datas.get(user["port"]):
+                if user["enable"]:
+                    report_datas[user["port"]]["active_users_count"] += 1
+                    report_datas[user["port"]]["active_unlimited_users"] += (
+                        1 if user["totalGB"] == 0 else 0
+                    )
+                    report_datas[user["port"]]["active_users_totalGB"] += user["totalGB"]
+                    report_datas[user["port"]]["active_users_totalUsed"] += user["down"] + user["up"]
+                else:
+                    report_datas[user["port"]]["inactive_users_count"] += 1
+                    report_datas[user["port"]]["inactive_unlimited_users"] += (
+                        1 if user["totalGB"] == 0 else 0
+                    )
+                    report_datas[user["port"]]["inactive_users_totalGB"] += user["totalGB"]
+                    report_datas[user["port"]]["inactive_users_totalUsed"] += user["down"] + user["up"]
+
+            else:
+                report_data = {
+                    "active_users_count": 0,
+                    "active_unlimited_users": 0,
+                    "active_users_totalGB": 0,
+                    "active_users_totalUsed": 0,
+                    "inactive_users_count": 0,
+                    "inactive_unlimited_users": 0,
+                    "inactive_users_totalGB": 0,
+                    "inactive_users_totalUsed": 0,
+                }
+
+                if user["enable"]:
+                    report_data.update(
+                        {
+                            "active_users_count": 1,
+                            "active_unlimited_users": 1 if user["totalGB"] == 0 else 0,
+                            "active_users_totalGB": user["totalGB"],
+                            "active_users_totalUsed": user["down"] + user["up"],
+                        }
+                    )
+                else:
+                    report_data.update(
+                        {
+                            "inactive_users_count": 1,
+                            "inactive_unlimited_users": 1 if user["totalGB"] == 0 else 0,
+                            "inactive_users_totalGB": user["totalGB"],
+                            "inactive_users_totalUsed": user["down"] + user["up"],
+                        }
+                    )
+
+                report_datas[user["port"]] = report_data
+
+        for key in report_datas.keys():
+            report_datas[key]["active_users_totalGB"] = self.sizeof_fmt(report_datas[key]["active_users_totalGB"])
+            report_datas[key]["active_users_totalUsed"] = self.sizeof_fmt(report_datas[key]["active_users_totalUsed"])
+            report_datas[key]["inactive_users_totalGB"] = self.sizeof_fmt(report_datas[key]["inactive_users_totalGB"])
+            report_datas[key]["inactive_users_totalUsed"] = self.sizeof_fmt(
+                report_datas[key]["inactive_users_totalUsed"]
+            )
+
+        return report_datas
+
     def update(self):
         """call `/xui/inbound/list` api and save new data"""
         while main_thread().is_alive():
@@ -91,28 +153,29 @@ class UserFetch:
                     datas = res.json()
 
                     for port_user in datas["obj"]:
+                        port = port_user["port"]
                         users = json.loads(port_user["settings"])["clients"]
 
                         for user in users:
                             new_user_datas[user["email"]] = user
-                            new_user_datas[user["email"]].update(
-                                {"hashed_id": user["id"]}
-                            )
+                            new_user_datas[user["email"]].update({"uid": user["id"], "port": port})
 
                     for port_user in datas["obj"]:
-
                         for user in port_user["clientStats"]:
-
                             if new_user_datas.get(user["email"]):
                                 new_user_datas[user["email"]].update(**user)
 
                 self.users_datas = new_user_datas
-                print(f"update data, {len(new_user_datas) = }")
+                print("---------------------update data:")
+                pprint(self.report_all())
+                print("\n")
 
-                time.sleep(10)
+                time.sleep(20)
 
+            except KeyboardInterrupt:
+                return
             except:
-                time.sleep(10)
+                time.sleep(20)
 
     def sizeof_fmt(self, size):
         if type(size) == int:
@@ -123,9 +186,9 @@ class UserFetch:
             return f"{size:.{2}f} {unit}"
         return size
 
-    def get_by_id(self, hashed_id) -> Optional[UserDataType]:
+    def get_by_id(self, uid) -> Optional[UserDataType]:
         for _, user in self.users_datas.items():
-            if user["hashed_id"] == hashed_id:
+            if user["uid"] == uid:
                 return user
         return None
 
@@ -181,7 +244,6 @@ def extract_vmess_hash_id(vmess: str) -> Optional[str]:
 
 @app.on_message(filters.text & filters.private)
 async def users(client: Client, message: Message):
-
     text: str = message.text
 
     if text == "/start":
@@ -219,7 +281,7 @@ async def users(client: Client, message: Message):
 
         user_data = f"""
 ایمیل: {user['email']}
-هش ایدی: {user['hashed_id'][:8]}...
+یونیک ایدی: {user['uid'][:10]}...
 چند کاربره:   {user['limitIp'] or '(بدون محدودیت)'}
 حجم قابل استفاده: {user_fetch.sizeof_fmt(user['totalGB']) if 0 != user.get('totalGB') else "(بدون محدودیت)" }
 حجم کلی استفاده شده: {user_fetch.sizeof_fmt(user_total) if 0 != user_total else 0 }
@@ -237,7 +299,6 @@ async def users(client: Client, message: Message):
 
 
 if __name__ == "__main__":
-
     # login to panel
     if not user_fetch.login():
         print("login failed")
@@ -245,6 +306,7 @@ if __name__ == "__main__":
 
     Thread(target=user_fetch.update).start()  # start lop for get update from server
 
-    print("start telegram bot app")
+    # print("start telegram bot app")
 
-    app.run()
+    # app.run()
+    time.sleep(100)
