@@ -309,4 +309,3 @@ if __name__ == "__main__":
     print("start telegram bot app")
 
     app.run()
-    time.sleep(100)
