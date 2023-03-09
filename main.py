@@ -86,14 +86,14 @@ class UserFetch:
                         1 if user["totalGB"] == 0 else 0
                     )
                     report_datas[user["port"]]["active_users_totalGB"] += user["totalGB"]
-                    report_datas[user["port"]]["active_users_totalUsed"] += user["down"] + user["up"]
+                    report_datas[user["port"]]["active_users_totalUsed"] += (user["down"] + user["up"])
                 else:
                     report_datas[user["port"]]["inactive_users_count"] += 1
                     report_datas[user["port"]]["inactive_unlimited_users"] += (
                         1 if user["totalGB"] == 0 else 0
                     )
                     report_datas[user["port"]]["inactive_users_totalGB"] += user["totalGB"]
-                    report_datas[user["port"]]["inactive_users_totalUsed"] += user["down"] + user["up"]
+                    report_datas[user["port"]]["inactive_users_totalUsed"] += (user["down"] + user["up"])
 
             else:
                 report_data = {
@@ -306,7 +306,7 @@ if __name__ == "__main__":
 
     Thread(target=user_fetch.update).start()  # start lop for get update from server
 
-    # print("start telegram bot app")
+    print("start telegram bot app")
 
-    # app.run()
+    app.run()
     time.sleep(100)
