@@ -166,7 +166,7 @@ class UserFetch:
                                 new_user_datas[user["email"]].update(**user)
 
                 self.users_datas = new_user_datas
-                print("---------------------update data:")
+                print(f"------------- {settings.PANEL_ADDRESS}:")
                 pprint(self.report_all())
                 print("\n")
 
